@@ -14,10 +14,12 @@ use std::{
     task::{Context, Poll},
 };
 use tokio::{
-    fs,
-    fs::OpenOptions,
     io::{self, AsyncRead as Read, AsyncReadExt, AsyncSeekExt},
 };
+#[cfg(feature = "fs")]
+use tokio::{
+    fs,
+   fs::OpenOptions};
 
 /// A read-only view into an entry of an archive.
 ///
@@ -90,6 +92,7 @@ impl<R: Read + Unpin> fmt::Debug for EntryIo<R> {
 /// When unpacking items the unpacked thing is returned to allow custom
 /// additional handling by users. Today the File is returned, in future
 /// the enum may be extended with kinds for links, directories etc.
+#[cfg(feature = "fs")]
 #[derive(Debug)]
 #[non_exhaustive]
 pub enum Unpacked {
@@ -237,6 +240,7 @@ impl<R: Read + Unpin> Entry<R> {
     /// #
     /// # Ok(()) }) }
     /// ```
+    #[cfg(feature = "fs")]
     pub async fn unpack<P: AsRef<Path>>(&mut self, dst: P) -> io::Result<Unpacked> {
         self.fields.unpack(None, dst.as_ref()).await
     }
@@ -272,6 +276,7 @@ impl<R: Read + Unpin> Entry<R> {
     /// #
     /// # Ok(()) }) }
     /// ```
+    #[cfg(feature = "fs")]
     pub async fn unpack_in<P: AsRef<Path>>(&mut self, dst: P) -> io::Result<bool> {
         self.fields.unpack_in(dst.as_ref()).await
     }
@@ -414,6 +419,7 @@ impl<R: Read + Unpin> EntryFields<R> {
         Ok(Some(pax_extensions(self.pax_extensions.as_ref().unwrap())))
     }
 
+    #[cfg(feature = "fs")]
     async fn unpack_in(&mut self, dst: &Path) -> io::Result<bool> {
         // Notes regarding bsdtar 2.8.3 / libarchive 2.8.3:
         // * Leading '/'s are trimmed. For example, `///test` is treated as
@@ -482,6 +488,7 @@ impl<R: Read + Unpin> EntryFields<R> {
     }
 
     /// Unpack as destination directory `dst`.
+    #[cfg(feature = "fs")]
     async fn unpack_dir(&mut self, dst: &Path) -> io::Result<()> {
         // If the directory already exists just let it slide
         match fs::create_dir(dst).await {
@@ -502,6 +509,7 @@ impl<R: Read + Unpin> EntryFields<R> {
     }
 
     /// Returns access to the header of this entry in the archive.
+    #[cfg(feature = "fs")]
     async fn unpack(&mut self, target_base: Option<&Path>, dst: &Path) -> io::Result<Unpacked> {
         let kind = self.header.entry_type();
 

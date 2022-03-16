@@ -4,9 +4,10 @@ use crate::{
 };
 use std::{borrow::Cow, fs::Metadata, path::Path};
 use tokio::{
-    fs,
     io::{self, AsyncRead as Read, AsyncReadExt, AsyncWrite as Write, AsyncWriteExt},
 };
+#[cfg(feature = "fs")]
+use tokio::fs;
 
 /// A structure for building archives
 ///

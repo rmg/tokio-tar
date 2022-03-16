@@ -222,6 +222,7 @@ impl<R: Read + Unpin> Archive<R> {
     /// #
     /// # Ok(()) }) }
     /// ```
+    #[cfg(feature = "fs")]
     pub async fn unpack<P: AsRef<Path>>(&mut self, dst: P) -> io::Result<()> {
         let mut entries = self.entries()?;
         let mut pinned = Pin::new(&mut entries);
